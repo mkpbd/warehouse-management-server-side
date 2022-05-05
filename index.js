@@ -59,17 +59,20 @@ const run = async()=>{
 
       const data = req.body;
 
-     const result = await database.collection("products").insertOne(
-       {
-         productName:"abcd"
-       ,ProductDescription:'bbcdd', 
-       Price: 500
-       ,qty:20,
-        supplier:'aaaa'}
-       );
+     const result = await database.collection("products").insertOne(data);
 
 
       console.log("result ", result.insertedId);
+
+      res.send(result);
+
+
+      // {
+      //   productName:"abcd"
+      // ,ProductDescription:'bbcdd', 
+      // Price: 500
+      // ,qty:20,
+      //  supplier:'aaaa'}
       
 
       
@@ -90,7 +93,7 @@ const run = async()=>{
  
     // update  products
 
-    app.put('/products/:id',(req, res)=>{
+    app.put('/products/:id',async(req, res)=>{
 
       const id = req.params.id;
       const products = req.body;
