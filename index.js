@@ -90,6 +90,19 @@ const run = async()=>{
 
 
     })
+
+    // single items 
+
+    app.get('/singleItem/:id', async(req, res)=>{
+
+      const id= req.params.id;
+      const query = {_id:objectId(id)};
+      const result = await database.collection('products');
+      const rr = await result.findOne(query);
+      res.send(rr);
+
+      
+    })
  
     // update  products
 
