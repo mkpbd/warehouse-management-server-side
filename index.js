@@ -127,10 +127,59 @@ const run = async()=>{
       const result = await updateColl.updateOne(filter, updateDoc, options);
 
       res.send(result);
-
       console.log(result);
 
     });
+
+    // ReStock items  
+
+    app.put('/restock/:id',async(req, res)=>{
+
+      const id = req.params.id;
+      const products = req.body;
+      const restock = database.collection('products');
+      const filter = { _id: objectId(id) };
+      const options = { upsert: true };
+
+      const updateDoc = {
+        $set: {
+          qty:products.qty
+          
+        }
+        
+      };
+
+     // console.log("prouct Object",products)
+      const result = await restock.updateOne(filter, updateDoc, options);
+
+      res.send(result);
+      console.log(result);
+
+    });
+
+
+    // item delivered 
+
+    app.put('/item-delivered/:id',async(req, res)=>{
+     const id = req.params.id;
+      const products = req.body;
+      const itemDeliverUpdate = database.collection('products');
+      const filter = { _id: objectId(id) };
+      const options = { upsert: true };
+      const updateDoc = {
+        $set: {
+          qty:parseInt(products.qty) - 1
+          
+        }
+        
+      };
+
+     // console.log("prouct Object",products)
+      const result = await itemDeliverUpdate.updateOne(filter, updateDoc, options);
+
+      res.send(result);
+      //console.log(result);
+    })
     
 
   } finally{
