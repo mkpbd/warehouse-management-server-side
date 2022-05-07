@@ -117,7 +117,11 @@ const run = async()=>{
       const updateDoc = {
         $set: {
           qty:products.qty,
-          price: products.price
+          price: products.price,
+          productName: products.productName,
+          productDescription: products.productDescription,
+          supplier: products.supplier,
+          imageUrl: products.imageUrl,
           
         }
         
