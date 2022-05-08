@@ -1,6 +1,6 @@
 const express = require('express');
 
-
+require('dotenv').config();
 const { MongoClient, ServerApiVersion } = require('mongodb');
 const objectId = require('mongodb').ObjectId;
 const app = express();
