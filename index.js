@@ -1,211 +1,174 @@
-const express = require('express');
+const express = require("express");
 
-require('dotenv').config();
-const { MongoClient, ServerApiVersion } = require('mongodb');
-const objectId = require('mongodb').ObjectId;
+require("dotenv").config();
+const { MongoClient, ServerApiVersion } = require("mongodb");
+const objectId = require("mongodb").ObjectId;
 const app = express();
 
-// port number 
+// port number
 const port = process.env.PORT || 5000;
 
-// Middleware 
-const cors = require('cors');
+// Middleware
+const cors = require("cors");
 
 app.use(cors());
 
 app.use(express.json());
 
-app.get('/',(req, res)=>{
-    res.send("connection is establish");
-})
+app.get("/", (req, res) => {
+  res.send("connection is establish");
+});
 
+//process.env.DB_USER;
 
-const uri = "mongodb+srv://mostofakamal:mk6683mk*@cluster0.zwqcs.mongodb.net/myFirstDatabase?retryWrites=true&w=majority";
-const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
+const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.zwqcs.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`;
+const client = new MongoClient(uri, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+  serverApi: ServerApiVersion.v1,
+});
 // client.connect(err => {
 //   const productCollection = client.db("carewarehouse").collection("products");
 //   // perform actions on the collection object
 //   console.log("mongodb Connection ok");
- 
+
 // });
 
-
-const run = async()=>{
-
-
-  try{
-
+const run = async () => {
+  try {
     await client.connect();
 
-    const database =  client.db('carewarehouse');
+    const database = client.db("carewarehouse");
 
-    // get all products 
-    app.get('/allProducts', async(req, res)=>{
-
-      const productCollection =  database.collection('products');
+    // get all products
+    app.get("/allProducts", async (req, res) => {
+      const productCollection = database.collection("products");
       const result = await productCollection.find({}).toArray();
-  
+
       res.send(result);
-      console.log("result",result);
-
+      console.log("result", result);
     });
-
 
     // add products
 
-    app.post('/add-products',async(req, res)=>{
-
-      // create object 
+    app.post("/add-products", async (req, res) => {
+      // create object
 
       const data = req.body;
 
-     const result = await database.collection("products").insertOne(data);
-
+      const result = await database.collection("products").insertOne(data);
 
       console.log("result ", result.insertedId);
 
       res.send(result);
 
-
       // {
       //   productName:"abcd"
-      // ,ProductDescription:'bbcdd', 
+      // ,ProductDescription:'bbcdd',
       // Price: 500
       // ,qty:20,
       //  supplier:'aaaa'}
-      
-
-      
     });
 
+    // delete Products
 
-    // delete Products 
-
-    app.delete('/product/:id', async(req, res)=>{
+    app.delete("/product/:id", async (req, res) => {
       const _id = req.params.id;
-      const query = {_id:objectId(_id)};
-      const result = await database.collection('products');
+      const query = { _id: objectId(_id) };
+      const result = await database.collection("products");
       const rr = await result.deleteOne(query);
       res.send(rr);
+    });
 
+    // single items
 
-    })
-
-    // single items 
-
-    app.get('/singleItem/:id', async(req, res)=>{
-
-      const id= req.params.id;
-      const query = {_id:objectId(id)};
-      const result = await database.collection('products');
+    app.get("/singleItem/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: objectId(id) };
+      const result = await database.collection("products");
       const rr = await result.findOne(query);
       res.send(rr);
+    });
 
-      
-    })
- 
     // update  products
 
-    app.put('/product/:id',async(req, res)=>{
-
+    app.put("/product/:id", async (req, res) => {
       const id = req.params.id;
       const products = req.body;
-      const updateColl = database.collection('products');
+      const updateColl = database.collection("products");
       const filter = { _id: objectId(id) };
       const options = { upsert: true };
 
       const updateDoc = {
         $set: {
-          qty:products.qty,
+          qty: products.qty,
           price: products.price,
           productName: products.productName,
           productDescription: products.productDescription,
           supplier: products.supplier,
           imageUrl: products.imageUrl,
-          
-        }
-        
+        },
       };
 
-      console.log("prouct Object",products)
+      console.log("prouct Object", products);
       const result = await updateColl.updateOne(filter, updateDoc, options);
 
       res.send(result);
       console.log(result);
-
     });
 
-    // ReStock items  
+    // ReStock items
 
-    app.put('/restock/:id',async(req, res)=>{
-
+    app.put("/restock/:id", async (req, res) => {
       const id = req.params.id;
       const products = req.body;
-      const restock = database.collection('products');
+      const restock = database.collection("products");
       const filter = { _id: objectId(id) };
       const options = { upsert: true };
 
       const updateDoc = {
         $set: {
-          qty:products.qty
-          
-        }
-        
+          qty: products.qty,
+        },
       };
 
-     // console.log("prouct Object",products)
+      // console.log("prouct Object",products)
       const result = await restock.updateOne(filter, updateDoc, options);
 
       res.send(result);
       console.log(result);
-
     });
 
+    // item delivered
 
-    // item delivered 
-
-    app.put('/item-delivered/:id',async(req, res)=>{
-     const id = req.params.id;
+    app.put("/item-delivered/:id", async (req, res) => {
+      const id = req.params.id;
       const products = req.body;
-      const itemDeliverUpdate = database.collection('products');
+      const itemDeliverUpdate = database.collection("products");
       const filter = { _id: objectId(id) };
       const options = { upsert: true };
       const updateDoc = {
         $set: {
-          qty:parseInt(products.qty) - 1
-          
-        }
-        
+          qty: parseInt(products.qty) - 1,
+        },
       };
 
-     // console.log("prouct Object",products)
-      const result = await itemDeliverUpdate.updateOne(filter, updateDoc, options);
+      // console.log("prouct Object",products)
+      const result = await itemDeliverUpdate.updateOne(
+        filter,
+        updateDoc,
+        options
+      );
 
       res.send(result);
       //console.log(result);
-    })
-    
-
-  } finally{
-
+    });
+  } finally {
   }
-
-
-}
-
-
+};
 
 run().catch(console.dir);
 
-
-
-
-
-app.listen(port, ()=>{
-    console.log("Server is running Now");
+app.listen(port, () => {
+  console.log("Server is running Now");
 });
-
-
-
-
-
